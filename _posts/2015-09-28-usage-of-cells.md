@@ -95,4 +95,4 @@ show.haml 最後取得的程式就會被做成 cache存放。
 
 ##Reference##
 > [http://trailblazerb.org/gems/cells/caching.html](http://trailblazerb.org/gems/cells/caching.html)<br>
-> [http://trailblazerb.org/gems/cells/caching.html](http://blog.xdite.net/posts/2013/09/01/cells-partial-cache-1)
+> [http://blog.xdite.net/posts/2013/09/01/cells-partial-cache-1](http://blog.xdite.net/posts/2013/09/01/cells-partial-cache-1)
