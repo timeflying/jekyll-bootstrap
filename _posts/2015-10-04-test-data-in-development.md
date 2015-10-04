@@ -91,7 +91,7 @@ config/initializers/omniauth.rb:
 
 3. 製作建立假資料的腳本/lib/sample.rb
 
-		#建立時model時可以動態指定所要建立的model的值
+		#建立時model時可以動態指定所要建立的model的attributes
 		currency1= Fabricate(:currency, currency_code: 'TWD', sequence_status: 1)
 		currency2= Fabricate(:currency, currency_code: 'GBP', sequence_status: 2)
 		currency3= Fabricate(:currency, currency_code: 'AZN', sequence_status: 0)
