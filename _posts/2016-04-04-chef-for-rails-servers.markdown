@@ -1,5 +1,6 @@
 ---
 layout: post
+theme: twitter
 title: Chef for Rails servers
 ---
 
