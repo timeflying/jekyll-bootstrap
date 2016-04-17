@@ -15,7 +15,7 @@
     {% endif %}
 
     {% if site.JB.ASSET_PATH %}
-      {% capture ASSET_PATH %}{{ BASE_PATH }}/assets/themes/{{ layout.theme.name }}{% endcapture %
+      {% assign ASSET_PATH = site.JB.ASSET_PATH %}
     {% else %}
       {% capture ASSET_PATH %}{{ BASE_PATH }}/assets/themes/{{ layout.theme.name }}{% endcapture %}
     {% endif %}  
