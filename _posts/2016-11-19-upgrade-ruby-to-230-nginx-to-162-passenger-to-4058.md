@@ -14,7 +14,7 @@ tags: [nginx, passenger, ruby, deploy]
 3. ./configure --prefix=/opt/ruby-2.3.0  # install ruby to /opt/ruby-2.3.0
 4. make
 5. make install
-6. rm /usr/local/bin/ruby
+6. mv /usr/local/bin/ruby /usr/local/bin/ruby-2.1.8
 7. ln -s /opt/ruby-2.3.0/bin/ruby /usr/local/bin/ruby  # use ruby-2.3.0 as default ruby
 
 ##Upgrade Passenger##
