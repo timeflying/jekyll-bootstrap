@@ -8,8 +8,6 @@ tags: []
 {% include JB/setup %}
 
 ### 1. Algorithm
-
-#### Assumption
   
   We assume the cost of a user for a day is related to the cost of the yesterday.
   Therefore, to predict cost for a specific day. e.g. 2017-05-02, we can use the information of the day before the prediction day, e.g. 2017-05-01.
