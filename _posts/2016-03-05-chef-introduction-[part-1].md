@@ -6,43 +6,43 @@ category:
 tags: []
 ---
 {% include JB/setup %}
-##Chef
+## Chef
 
-###When setup or upgrade servers, Chef solve problems: 
+### When setup or upgrade servers, Chef solve problems: 
 
 1. Very hard to keep track of what’s been done.
 2. Slow.
 3. Not scale.
 
-###Terminology
+### Terminology
 
-#####Recipe:
+##### Recipe:
 
 Chef definition for installing a single component, e.g. Ruby, mysql-server, Monit etc
 
-#####Cookbook:
+##### Cookbook:
 
 A selection of recipes, so for example a “mysql” cookbook might include a recipe for a MySQL server and another one for a MySQL client.
 
-#####Node:
+##### Node:
 A remote server we’re provisioning
 
-#####Role:
+##### Role:
 A combination of recipes which when applied to a node, allows it to perform a particular role.
 For example a “Postgres Server” role might include recipes for installing postgres-server as well as installing and configuring the firewall and setting up suitable monitoring for the server process.
 You can sort of think of a role as an equivalent to a mixin in ruby. It allows you to create a piece of re-usable functionality that can later be applied to many nodes.
 
-#####Attribute:
+##### Attribute:
 An attribute is a parameter, usually in the form of a key value pair in either a node or role definition which allows us to customise the behaviour of a recipe. Typical things attributes might be used to control include configuration variables and the versions of packages which are installed.
 
-#####Data Bag:
+##### Data Bag:
 A JSON file which contains metadata used by recipes, for example lists of users to be created and the valid public keys for authenticating as them.
 
-#####Chef Repository:
+##### Chef Repository:
 A collection of node and role definitions.
 
 
-###Set up a Project
+### Set up a Project
 1. Create dir
 
 		mkdir chef_projects
@@ -62,7 +62,7 @@ A collection of node and role definitions.
 		bundle install
 	
 
-###Create a Chef repository	
+### Create a Chef repository	
 
 1. Create repository
 		
@@ -74,7 +74,7 @@ A collection of node and role definitions.
 		cp Gemfile rdr_redis_example
 		cp Gemfile.lock rdr_redis_example
 	
-####Directory Structure
+#### Directory Structure
 
 	├── .chef
 	│  └── knife.rb
@@ -123,15 +123,15 @@ it is wiped wiped automatically when we start provisioning.
   2. a node config is generated locally in the folder nodes with the filename YOURSERVERIP.json.
 
 
-##Sample: Install Redis server
+##  Sample: Install Redis server
   
-###Generate Cookbook
+### Generate Cookbook
 
 
 	knife cookbook create redis-server -o site-cookbooks
 
 
-####Structure of a Cookbook
+#### Structure of a Cookbook
 
   
 	├── attributes
@@ -149,17 +149,25 @@ it is wiped wiped automatically when we start provisioning.
 	├── README.md
 	└── metadata.rb
   
-####metadata.rb
+
+#### metadata.rb
+
 This file contains details about the purpose of the cookbook as well as any dependencies and the version.
-####The recipes directory
+
+#### The recipes directory
+
 This directory contains individual recipes. All cookbooks should have a default recipe defined in recipes/default.rb but may also declare others.
-####The templates directory
+
+#### The templates directory
+
 When we want to create a file on the remote server, we’ll create erb files **within a subfolder(represents different OS)** of this directory which chef will then convert into a remote file. The advantage of using erb here is that it means we can dynamically generate and interpolate values based on attributes.
-####The attributes directory
+
+#### The attributes directory
+
 Attributes are values most commonly set in a node or role definition which allow us to customise the behavior of a recipe. Common uses would include choosing the version of a package to be installed and customising configuration file values.
 In order to set default values for these attributes, we can create a file default.rb within the attributes folder of a cookbook. If we do not specify a value for an attribute in a node or role definition, the values from this file will be used.
 
-###1. Add dependency on 'apt' cookbook
+### 1. Add dependency on 'apt' cookbook
 'apt' cookbook Github: [https://github.com/opscode-cookbooks/apt.git](https://github.com/opscode-cookbooks/apt.git "https://github.com/opscode-cookbooks/apt.git")
 
 #### Berkshelf
@@ -167,7 +175,7 @@ Berkshelf provides exactly functions as Bundler in rails:
 1. Manage dependencies 
 2. Generate Berksfile.lock
 
-#####rdr_redis_example/Berksfile
+##### rdr_redis_example/Berksfile
 ---
 
 	source "https://api.berkshelf.com"
@@ -180,7 +188,7 @@ Execute command:
 
 Add dependency in newly created cookbook: `redis-server`'s metadata
 
-#####rdr_redis_example/site-cookbooks/redis-server/metadata.rb
+##### rdr_redis_example/site-cookbooks/redis-server/metadata.rb
 ---
 
 	name             'redis-server'
@@ -192,9 +200,9 @@ Add dependency in newly created cookbook: `redis-server`'s metadata
 	version          '0.1.0'
 	depends          'apt' #Add dependency on 'apt'
 
-####Use DSL provided by `apt` cookbook to define 'Lightweight Resource Providers(LWRP)'
+#### Use DSL provided by `apt` cookbook to define 'Lightweight Resource Providers(LWRP)'
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 
 	apt_repository 'redis-server' do
@@ -202,10 +210,10 @@ Add dependency in newly created cookbook: `redis-server`'s metadata
 		distribution node['lsb']['codename']
 	end
 
-####Using Chef DSL to define package to install
+#### Using Chef DSL to define package to install
 Documentation: [https://docs.getchef.com/resource_package.html](https://docs.getchef.com/resource_package.html "https://docs.getchef.com/resource_package.html")
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 
 	apt_repository 'redis-server' do
@@ -215,8 +223,9 @@ Documentation: [https://docs.getchef.com/resource_package.html](https://docs.get
 
 	package 'redis-server'
 
-###2. Add flexibilty with attributes
-#####rdr_redis_example/site-cookbooks/redis-server/attributes/default.rb 
+### 2. Add flexibilty with attributes
+
+##### rdr_redis_example/site-cookbooks/redis-server/attributes/default.rb 
 ---
 
 	default['redis-server']['appendonly'] = 'no'
@@ -240,10 +249,10 @@ Documentation: [https://docs.getchef.com/resource_package.html](https://docs.get
 	]
 	default['redis-server']['timeout'] = 300
 
-####Access attributes from recipes
+#### Access attributes from recipes
 Attributes can be accessed from `node` variable.
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 
 	apt_repository 'redis-server' do
@@ -254,10 +263,10 @@ Attributes can be accessed from `node` variable.
 	package node['redis-server']['package']
 
 
-####Access attributes from templates
+#### Access attributes from templates
 Attributes can be accessed from `node` variable.
 
-#####rdr_redis_example/site-cookbooks/redis-server/templates/default/redis_conf.rb
+##### rdr_redis_example/site-cookbooks/redis-server/templates/default/redis_conf.rb
 ---
 
 	daemonize <%= node['redis-server']['daemonize'] %>
@@ -293,9 +302,9 @@ Attributes can be accessed from `node` variable.
 	<% end %>
 
 
-###3. Using templates in recipe
+### 3. Using templates in recipe
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 
 	.....
@@ -316,10 +325,10 @@ Attributes can be accessed from `node` variable.
 
 The internals of how Chef updates file is smart. It will compare the desired state of the file with the actual state of the file on the remote system, and only update the file on the remote system if the two are different.
 
-###4. Restart redis-server only when config changes
+### 4. Restart redis-server only when config changes
 Add `execute` DSL block
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 
 	.....
@@ -332,7 +341,7 @@ Add `execute` DSL block
 
 Notify the `execute` block when the config changes.
 
-#####rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
+##### rdr_redis_example/site-cookbooks/redis-server/recipes/default.rb 
 ---
 	.....
 	.....
@@ -343,11 +352,11 @@ Notify the `execute` block when the config changes.
 	  notifies :run, "execute[restart-redis]", :immediately # Notify restart-redis execution block
 	end
 
-###5. Updating the node
+### 5. Updating the node
 
 	bundle exec knife solo bootstrap root@YOURSERVERIP
 
-##Reference:
+## Reference:
 Complete Code: 
 [https://github.com/TalkingQuickly/redis-server/tree/5-more_flexible_attributes](https://github.com/TalkingQuickly/redis-server/tree/5-more_flexible_attributes "https://github.com/TalkingQuickly/redis-server/tree/5-more_flexible_attributes")
 

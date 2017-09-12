@@ -44,5 +44,7 @@ tags: []
   
   and dot product these two vectors `(0.3, 0.02, ...) * (245.2, 1000.5, 391.2, ...) = 10402`, then it's the prediction result.
  
-2. Code
+### 2. Code
+
+https://github.com/timeflying/andromoney-mining/blob/master/src/main/scala/com/andromoney/predictCost.scala
  

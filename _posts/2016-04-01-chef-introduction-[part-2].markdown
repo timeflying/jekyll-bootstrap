@@ -14,29 +14,29 @@ tags: []
 Recap:
 
 
-1. ####Directory Structure
+1. #### Directory Structure
 
-   	
-      	├── .chef
-   	  	│  └── knife.rb
-   	  	├── .gitignore
-	   	├── Berksfile
-   	  	├── Gemfile
-   	  	├── Gemfile.lock
-   	  	├── cookbooks
-   	  	├── data_bags
-   	  	├── environments
-   	  	├── nodes
-   	  	├── roles
-   	  	└── site-cookbooks
-
+```   	
+├── .chef
+│  └── knife.rb
+├── .gitignore
+├── Berksfile
+├── Gemfile
+├── Gemfile.lock
+├── cookbooks
+├── data_bags
+├── environments
+├── nodes
+├── roles
+└── site-cookbooks
+```
 3. YOURSERVERIP.json has been created in nodes directory when setting up a node.
 
-###Node Definitaion
+### Node Definitaion
 
 Override default attributes by node specific definition:
 
-#####rdr_redis_example/nodes/YOURSERVERIP.json
+##### rdr_redis_example/nodes/YOURSERVERIP.json
 ---
 ```json
 	{
@@ -60,9 +60,9 @@ Apply changes:
 
     knife solo cook root@YOURSERVERIP
 
-###Role Definition
+### Role Definition
 
-#####rdr_redis_example/roles/redis-cache-server.json
+##### rdr_redis_example/roles/redis-cache-server.json
 ```json
 {
   "name": "redis-cache-server",
@@ -86,7 +86,7 @@ Apply changes:
 ```
 Add role to node definition:
 
-#####rdr_redis_example/nodes/YOURSERVERIP.json
+##### rdr_redis_example/nodes/YOURSERVERIP.json
 ```json
 {
   "run_list": [
@@ -97,10 +97,12 @@ Add role to node definition:
   }  
 }
 ```
-###Attribute Hierachy
+
+### Attribute Hierachy 
+
 node override role, role override cookbook defaults
 
-####Roles
+#### Roles
 
 On a typical Rails project, we might end up with roles similar to the following:
 • server - basic configuration to be applied to all servers you manage. For example locking down SSH, ensuring a firewall is enabled, adding public keys for authentication and installing any favourite management tools. This role may also setup your base monitoring configuration
@@ -111,17 +113,17 @@ On a typical Rails project, we might end up with roles similar to the following:
 
 It’s worth noting here that roles can include other roles in a run_list. So it’s possible to create extremely granular roles and then group these together using other roles which are then included in node definitions.
 
-####A Limitations of Roles
+#### A Limitations of Roles
 1. One key limitation of roles is that there is no concept of versioning, There is no mechanism in place to ensure that the role we were applying has not changed since the last time we applied it. For this reason, some have gone as far as to describe setting attributes in roles as an antipattern.
 
-###Managing Cookbooks with Berkshelf
+### Managing Cookbooks with Berkshelf
 
 Berkshlef provides exactly same functionality as gem in rails.
 
 1. we can define the cookbooks our chef repository is dependent on and the versions of these. We can then use berks install to grab all of these cookbooks and its dependencies.
 2.  Generates a .lock file (Berksfile.lock) with the relevant versions for each cookbook.
 
-##Reference:
+## Reference:
 [https://github.com/ArturT/chef-deploying-rails-applications/tree/master/rdr_redis_example](https://github.com/ArturT/chef-deploying-rails-applications/tree/master/rdr_redis_example "https://github.com/ArturT/chef-deploying-rails-applications/tree/master/rdr_redis_example")
 http://dougireton.com/blog/2013/02/16/chef-cookbook-anti-patterns/
 http://realityforge.org/code/2012/11/19/role-cookbooks-and-wrapper-cookbooks.html

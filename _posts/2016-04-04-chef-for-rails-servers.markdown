@@ -4,21 +4,21 @@ theme: twitter
 title: Chef for Rails servers
 ---
 
-##Basic Server Setup
+## Basic Server Setup
 
-###Useful Tools
+### Useful Tools
 
 `look-and-feel_tlq` cookbook
 https://github.com/TalkingQuickly/look_and_feel-tlq
 Includes: htop, zip, vim...
 
-###Unattended upgrades
+### Unattended upgrades
 Automatic upgrades can ensure system remains upda to date and secure, but may break existing functionality,
 It's good practice to automatic upgrads for security related package updates only.
 
-####Configuring
+#### Configuring
 
-#####roles/server.json 
+##### roles/server.json 
 
 	...
 	"default_attributes": {
@@ -35,23 +35,23 @@ It's good practice to automatic upgrads for security related package updates onl
 	},
 	...
 
-###Automatic System Time via NTP
+### Automatic System Time via NTP
 
 The server role includes `recipe[ntp::default]`, in its run list. This has the effect of installing NTP which will periodically synchronize the system clock with a remote time server.
 
-###Locales
+### Locales
 
-####Why Locales Matter
+#### Why Locales Matter
 1. If we are using Postgres as our database provider, it will use the systems locale when it creates the initial database cluster. If we are using different locales in development and production, our systems are not identical and will behave differently in some respects.
 2. SSH client will send LC_* variable to server. This may be problematic:
 • A server is setup with only the locale en_US.utf8
 • Our locale developmen machine is setup with the locale en_GB.utf8
 
-####Configuring
+#### Configuring
 
 Two cookbooks which concern locales:
 
-#####roles/server.json 
+##### roles/server.json 
 
 
 	"locales" : {
@@ -62,7 +62,7 @@ Two cookbooks which concern locales:
 
 This defines the package(s) which provide locale functionality, for Ubuntu this is always locales. It then allows us to choose the locale which should be installed and set as the default locale.
 
-#####roles/server.json 
+##### roles/server.json 
 
 
 	"look_and_feel-tlq" : {
@@ -74,16 +74,16 @@ This defines the package(s) which provide locale functionality, for Ubuntu this 
 
 This uses the LWRP defined by the above locales cookbook to allow for the installation of multiple other locales alongside the default one.
 
-##Security
+## Security
 
-###Common pitfalls
+### Common pitfalls
 Mistake 1 - Not Updating Gems
 Mistake 2 - Hard coding credentials
 Mistake 3 Re-using Passwords
 
-###SSH Hardening
+### SSH Hardening
 
-#####roles/server.json 
+##### roles/server.json 
 
 
 	"openssh" : {
@@ -98,13 +98,13 @@ Mistake 3 Re-using Passwords
     }
 
 
-###Firewall
+### Firewall
 
 `ufw` cookbook which stands for “Uncomplicated Firewall” :  https://github.com/opscode-cookbooks/ufw
 
-####Configuring
+#### Configuring
 
-#####roles/ngnix.json 
+##### roles/ngnix.json 
 
     "default_attributes": {
       "firewall" : {
@@ -114,11 +114,11 @@ Mistake 3 Re-using Passwords
       }
     }
 
-###Users
+### Users
 
 `users` cookbook: https://github.com/chef-cookbooks/users
 
-#####data_bags/users/deploy.json
+##### data_bags/users/deploy.json
 
 
 	{
@@ -135,12 +135,12 @@ Mistake 3 Re-using Passwords
 
 The `sysadmins` recipe which is included in the server role will search for any user in the sysadmin group and add them to the system.
 
-###Sudo
+### Sudo
 
 `sudo` cookbook : https://github.com/ opscode-cookbooks/sudo 
 Included in the server role `recipe[sudo::default]`.
 
-#####roles/server.json 
+##### roles/server.json 
 
 
     "authorization": {
@@ -156,9 +156,9 @@ Included in the server role `recipe[sudo::default]`.
     },
 
 
-##Ruby & Gem dependencies
+## Ruby & Gem dependencies
 
-###How rbenv works
+### How rbenv works
 Rbenv will then determine which ruby version to execute the command with from the following sources, in order:
 
 1. The RBENV_VERSION environment variable
@@ -170,11 +170,11 @@ directories until reaching the filesystem root
 system wide install.
 5. If none of these are available, rbenv will default to the version of Ruby which would have been run if rbenv were not installed (e.g. system ruby)
 
-###Configuring
+### Configuring
 
 `chef-rbenv` cookbook
 
-#####roles/rails-app.json 
+##### roles/rails-app.json 
 
 
 	"default_attributes": {
@@ -193,11 +193,11 @@ system wide install.
 
 The rbenv::system performs a system wide install of rbenv, this means that it’s installed to /usr/local/rbenv rather than ∼/rbenv. This is generally my preference as it reduces issues caused by, for example, cron jobs running as root.
 
-###Gem Dependencies
+### Gem Dependencies
 
 The rails-server role also includes `recipe[rails_gem_dependencies-tlq::default]` which is a very simple cookbook I created to install packages required when compiling native extensions for common gems.
 
-#####rails_gem_dependencies-tlq/recipes/default.rb
+##### rails_gem_dependencies-tlq/recipes/default.rb
 
 
 	package 'curl'
@@ -216,34 +216,34 @@ The rails-server role also includes `recipe[rails_gem_dependencies-tlq::default]
 
 it installs some standard packages then adds a ppa which provides an up to date version of nodejs which we can use as our javascript runtime when compiling assets on the remote server.
 
-##Monit
+## Monit
 
 Monit can monitor system parameters such as processes and network interfaces. If a process fails or moves outside of a range of defined parameters, Monit can restart it, if a restart fails or there are too many restarts in a given period, Monit can alert us by email. If needed, using email to SMS services, we can have these alerts delivered by text message.
 
  1. `monit-tlq` cookbook
  2. `monit_configs-tlq` cookbook
  
-###Monit-tlq
+### Monit-tlq
 
 This cookbook takes care of installing and configuring Monit and contains only one recipe default.
 
-It begins by installing the Monit package and updates Monits main configuration file `/etc/- monit/monitrc` from the template `monit-rc.rb`.
+It begins by installing the Monit package and updates Monits main configuration file `/etc/- monit/monitrc` from the template `monit-rc.erb`.
 
-#####monit-tlq/templates/default/monit-rc.erb
+##### monit-tlq/templates/default/monit-rc.erb
 
 
 	set daemon <%= node[:monit][:poll_period] || 30 %>
 
 This sets the interval in seconds which Monit will performs its checks at. In Monit terminology this is known as a cycle.
 
-#####monit-tlq/templates/default/monit-rc.erb
+##### monit-tlq/templates/default/monit-rc.erb
 
 
 	set logfile syslog facility log_daemon
 
 This line tells Monit to log error and status messages to /var/log/syslog.
 
-#####monit-tlq/templates/default/monit-rc.erb
+##### monit-tlq/templates/default/monit-rc.erb
 
 
 	<% if node[:monit][:enable_emails] %>
@@ -270,7 +270,7 @@ This line tells Monit to log error and status messages to /var/log/syslog.
 This section sets up a mailserver and the users which should be alerted when appropriate conditions are met.
 The addition of `but not in {instance, pid}` prevents emails from being sent due to events which usually don’t require any manual intervention.
 
-#####monit-tlq/templates/default/monit-rc.erb
+##### monit-tlq/templates/default/monit-rc.erb
 
 
 	set httpd port 2812 and
@@ -283,7 +283,7 @@ The addition of `but not in {instance, pid}` prevents emails from being sent due
 
 The username and password (basic auth) are set in the final allow line.
 
-#####monit-tlq/templates/default/monit-rc.erb
+##### monit-tlq/templates/default/monit-rc.erb
 
 
 	include /etc/monit/conf.d/*.conf
@@ -299,7 +299,7 @@ If chef is used to install something (generally system components) then a suitab
 
 If a component is added via Capistrano (Rails apps and background workers) then the Monit configuration should be defined within the app and managed from Capistrano
 
-###System level monitoring
+### System level monitoring
 
 	check system localhost
 	  if loadavg (1min) > 4 then alert
@@ -313,13 +313,13 @@ The first three are perform a check, if the criteria are met then “alert”
 
 This second three tells Monit will only perform the specified action (in this case alert) if the conditions are met for 5 checks in a row.
 
-####Load Average
+#### Load Average
 
 The load average refers to the systems load, taken over three time periods, 1, 5 and 15 minutes.
 1.0 means the system is loaded to exactly its maximum capacity for 1 core.
 On systems with more than one core, we can roughly multiply your maximum acceptable load by the number of cores.
 
-####Monitoring Pids
+#### Monitoring Pids
 
 A typical Monit definition for monitoring a pidfile
 
@@ -331,28 +331,28 @@ A typical Monit definition for monitoring a pidfile
 We define a start command and a stop command. On each check, if process is not found to be running, Monit will execute the start command.
 The last line means that if there have been 15 attempts to restart a process in the last 15 cycles, then stop trying to restart it.
 
-####Finding Pidfiles
+#### Finding Pidfiles
 
 If there is no mention of the pidfile in the application, the next place to look is /run which is the “standard” location for pidfiles in Ubuntu
 
-####Pidfile Permissions
+#### Pidfile Permissions
 
 	# make sure the pid destination is writable
 	mkdir -p /var/run/an_application/
 	chown application_user:application_user /run/an_application
 
-####Monitoring Ports
+#### Monitoring Ports
 
 	if failed host 127.0.0.1 port 80 then restart
 
 Monit will attempt to establish a connection 12.0.0.1:80. If a connection cannot be established, then it will attempt to restart the process.
 
-####Free Space Monitoring
+#### Free Space Monitoring
 
 	check filesystem rootfs with path / 
   		if space usage > 80% then alert
 
-####Avoiding alert spamming
+#### Avoiding alert spamming
 
 For example:
 
@@ -360,7 +360,7 @@ For example:
 
 This means that globally alerts will be sent for all events except for instance and pid changes.
 
-####Serving the web interface of Monit  with Nginx
+#### Serving the web interface of Monit  with Nginx
 
 Since allow public IPs to access Monit Web Interface is dangerous, we use nginx as proxy.
 Ngnix config:
@@ -384,11 +384,11 @@ The above definition show that Nginx is serving both the Monit interface for its
 
 We allow Monit only allow internal IP to access & configure Ngnix to transfer the requests according their requesting hostname.
 
-##Ngnix
+## Ngnix
 
 Nginx proxies requests back to our application server (Unicorn). 
 
-#####roles/nginx-server.json
+##### roles/nginx-server.json
 
 
 	{
@@ -421,12 +421,12 @@ Nginx proxies requests back to our application server (Unicorn).
     }
 
 
-####Virtual Hosts (Should handled by applications deployment process)
+#### Virtual Hosts (Should handled by applications deployment process)
 
 Anything specific to a single application being deployed, should be handled by the applications deployment process rather than the server provisioning process. 
 This allows a single server to to be used to host multiple applications without provisioning changes which may be disruptive to all applications on it.
 
-####Generated Monit configuration for Ngnix(the `recipe[monit_configs-tlq::nginx]` cookbook )
+#### Generated Monit configuration for Ngnix(the `recipe[monit_configs-tlq::nginx]` cookbook )
 
 	check process nginx with pidfile /var/run/nginx.pid
 	  start program = "/etc/init.d/nginx start"
@@ -435,11 +435,11 @@ This allows a single server to to be used to host multiple applications without 
 	  if 15 restarts within 15 cycles then timeout
 
 
-##MySQL
+## MySQL
 
 For a simple installation using the ‘mysql-server’ role, the only parameters it is necessary to set in the node definition are:
 
-#####nodes/YOURSERVERIP.json
+##### nodes/YOURSERVERIP.json
 
 
 	"mysql": { 
@@ -450,7 +450,7 @@ For a simple installation using the ‘mysql-server’ role, the only parameters
 
 It’s important to note that the chef recipe can only set the passwords when it first installs MySQL. This cannot be used to change the passwords post installation. This also means that if, for any reason, the mysql-server package has already been installed when the mysql::server recipe is run, it is likely to fail. If therefore you run into strange permissions errors when chef reaches MySQL, check carefully that no other recipe is installing the mysql-server package as a dependency.
 
-####Generated Monit configuration for MySQL
+#### Generated Monit configuration for MySQL
 
 	check process mysql with pidfile /var/run/mysqld/mysqld.pid
 	  group database
@@ -460,9 +460,9 @@ It’s important to note that the chef recipe can only set the passwords when it
 	  if 15 restarts within 15 cycles then timeout
 
 
-##Redis & Memecached
+## Redis & Memecached
 
-#####roles/redis-server.json
+##### roles/redis-server.json
 
 
 	{
@@ -493,9 +493,9 @@ If we want to limit its maximum resource usage. We can add the following to eith
 
 It means 10 of keys will be selected randomly and the least recently used of these will be discarded.
  
-###Monitoring
+### Monitoring
 
-#####monit_configs-tlq/templates/default/redis-server.conf.erb
+##### monit_configs-tlq/templates/default/redis-server.conf.erb
 
 
 	check process redis with pidfile /var/run/redis/redis-server.pid

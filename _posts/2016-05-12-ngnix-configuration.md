@@ -148,6 +148,6 @@ to swap in the new certificates and reload nginx. If, after testing the site, so
 you can execute:
 `./script_name rollback_certs`to revert to the previous ones. And then repeat load_new_certs once you’ve resolved the issue.
 
-Once you have the new certificates working as intended, you can use:
+gOnce you have the new certificates working as intended, you can use:
 `./script_name cleanup_certs`
 To remove the temporary and legacy files created.
