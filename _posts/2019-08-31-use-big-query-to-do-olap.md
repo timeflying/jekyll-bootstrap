@@ -17,7 +17,7 @@ as our OLAP tool.
 
 #### No maintainance effort
 
-Compared to setting up a Spark Cluster, we just need import data into Big Query & that's it, then you can start query.
+Compared to setting up a Spark Cluster, we just need import data into Big Query, then you can start query.
 No need to worry about maintaining a cluster.
 
 #### Flexibility
@@ -51,5 +51,7 @@ https://gist.github.com/tilumi/28cbbf1b38147b2193dfb576dd9db7a1
     
 ### Reference
 
+Query Language: https://cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax
 Partition Tables: https://cloud.google.com/bigquery/docs/partitioned-tables
 Clustered Tables: https://cloud.google.com/bigquery/docs/clustered-tables
+
